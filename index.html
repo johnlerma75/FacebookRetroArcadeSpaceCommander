@@ -482,3 +482,109 @@ if (this.type === 1) {
                 this.color = color;
                 this.life = 1.0;
             }
+ update() {
+                this.y -= 0.8;
+                this.life -= 0.03;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.fillStyle = this.color;
+                ctx.font = '8px "Press Start 2P"';
+                ctx.fillText(this.text, this.x, this.y);
+                ctx.restore();
+            }
+        }
+
+        function createExplosion(x, y, color = '#f97316', count = 12) {
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(x, y, color));
+            }
+        }
+
+        // --- Input Event Handlers ---
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = true;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = true;
+            if (e.code === 'Space') keys.fire = true;
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if (e.code === 'ArrowLeft' || e.code === 'KeyA') keys.left = false;
+            if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
+            if (e.code === 'Space') keys.fire = false;
+        });
+
+        // Touch Control Wiring
+        const bindTouch = (id, keyName) => {
+            const btn = document.getElementById(id);
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                sound.init();
+                keys[keyName] = true;
+            });
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                keys[keyName] = false;
+            });
+            btn.addEventListener('mousedown', () => { keys[keyName] = true; });
+            btn.addEventListener('mouseup', () => { keys[keyName] = false; });
+        };
+
+        bindTouch('btnLeft', 'left');
+        bindTouch('btnRight', 'right');
+        bindTouch('btnFire', 'fire');
+
+        // Mute / Unmute Button
+        soundToggleBtn.addEventListener('click', () => {
+            sound.init();
+            sound.muted = !sound.muted;
+            soundToggleBtn.textContent = sound.muted ? '🔇 MUTED' : '🔊 SOUND';
+        });
+
+        // --- Core Game Functions ---
+        function startGame() {
+            sound.init();
+            player = new Player();
+            bullets = [];
+            enemies = [];
+            particles = [];
+            powerups = [];
+            popups = [];
+            score = 0;
+            lives = 3;
+            frameCount = 0;
+            isPlaying = true;
+
+            updateHUD();
+            startOverlay.classList.add('hidden');
+            gameOverOverlay.classList.add('hidden');
+        }
+
+        function triggerGameOver() {
+            isPlaying = false;
+            sound.playGameOver();
+
+            let isNewRecord = false;
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('cosmic_crusader_highscore', highScore.toString());
+                isNewRecord = true;
+            }
+
+            finalScore.textContent = score;
+            finalHighScore.textContent = highScore;
+            if (isNewRecord) {
+                newRecordTag.classList.remove('hidden');
+            } else {
+                newRecordTag.classList.add('hidden');
+            }
+
+            gameOverOverlay.classList.remove('hidden');
+        }
+
+        function updateHUD() {
+            scoreDisplay.textContent = score.toString().padStart(6, '0');
+            livesDisplay.textContent = `x${lives}`;
+        }
