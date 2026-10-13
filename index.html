@@ -395,3 +395,90 @@ osc.connect(gain);
             draw() {
                 ctx.save();
                 ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
+if (this.type === 1) {
+                    // Small Invader (Magenta)
+                    ctx.fillStyle = '#e879f9';
+                    ctx.fillRect(-8, -8, 16, 16);
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(-5, -3, 3, 3);
+                    ctx.fillRect(2, -3, 3, 3);
+                } else {
+                    // Heavy Invader (Red/Orange)
+                    ctx.fillStyle = '#f87171';
+                    ctx.fillRect(-12, -10, 24, 16);
+                    ctx.fillStyle = '#f97316';
+                    ctx.fillRect(-8, 2, 16, 6);
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(-6, -4, 4, 4);
+                    ctx.fillRect(2, -4, 4, 4);
+                }
+
+                ctx.restore();
+            }
+        }
+
+        // PowerUp Class
+        class PowerUp {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type; // 'triple' or 'shield'
+                this.w = 14;
+                this.h = 14;
+                this.active = true;
+            }
+
+            update() {
+                this.y += 1.5;
+                if (this.y > GAME_HEIGHT + 20) this.active = false;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.fillStyle = this.type === 'triple' ? '#a855f7' : '#38bdf8';
+                ctx.fillRect(0, 0, this.w, this.h);
+                ctx.fillStyle = '#fff';
+                ctx.font = '8px "Press Start 2P"';
+                ctx.fillText(this.type === 'triple' ? '3' : 'S', 3, 11);
+                ctx.restore();
+            }
+        }
+
+        // Particle FX
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.vx = (Math.random() - 0.5) * 4;
+                this.vy = (Math.random() - 0.5) * 4;
+                this.size = Math.random() * 3 + 1;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.05 + 0.03;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.fillStyle = this.color;
+                ctx.fillRect(this.x, this.y, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        // Floating Score Text Popup
+        class ScorePopup {
+            constructor(x, y, text, color = '#facc15') {
+                this.x = x;
+                this.y = y;
+                this.text = text;
+                this.color = color;
+                this.life = 1.0;
+            }
