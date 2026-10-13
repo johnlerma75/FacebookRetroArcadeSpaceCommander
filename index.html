@@ -588,3 +588,196 @@ if (this.type === 1) {
             scoreDisplay.textContent = score.toString().padStart(6, '0');
             livesDisplay.textContent = `x${lives}`;
         }
+        function updateHUD() {
+            scoreDisplay.textContent = score.toString().padStart(6, '0');
+            livesDisplay.textContent = `x${lives}`;
+        }
+
+        // --- Facebook Share Action ---
+        document.getElementById('fbShareBtn').addEventListener('click', () => {
+            const gameUrl = encodeURIComponent(window.location.href);
+            const shareText = encodeURIComponent(`I scored ${score} points in Cosmic Crusader! Can you beat my high score? 🚀👾`);
+            const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${gameUrl}&quote=${shareText}`;
+            window.open(fbUrl, '_blank', 'width=600,height=400');
+        });
+
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('restartBtn').addEventListener('click', startGame);
+
+        // --- Main Game Loop ---
+        function update() {
+            if (!isPlaying) return;
+
+            frameCount++;
+
+            // Screen Shake Decay
+            if (screenShake > 0) screenShake--;
+
+            // Update Background Starfield
+            stars.forEach(star => {
+                star.y += star.speed;
+                if (star.y > GAME_HEIGHT) {
+                    star.y = 0;
+                    star.x = Math.random() * GAME_WIDTH;
+                }
+            });
+
+            // Update Player
+            player.update();
+
+            // Spawn Enemies dynamically over time
+            const spawnRate = Math.max(25, 60 - Math.floor(score / 500) * 5);
+            if (frameCount % spawnRate === 0) {
+                const isHeavy = Math.random() < 0.25;
+                enemies.push(new Enemy(isHeavy ? 2 : 1));
+            }
+
+            // Update Bullets
+            bullets.forEach(b => b.update());
+            bullets = bullets.filter(b => b.active);
+
+            // Update Powerups
+            powerups.forEach(p => p.update());
+            powerups = powerups.filter(p => p.active);
+
+            // Update Enemies & Collisions
+            enemies.forEach(enemy => {
+                enemy.update();
+
+                // Bullet <-> Enemy Collision
+                bullets.forEach(bullet => {
+                    if (bullet.active && enemy.active &&
+                        bullet.x < enemy.x + enemy.w &&
+                        bullet.x + bullet.w > enemy.x &&
+                        bullet.y < enemy.y + enemy.h &&
+                        bullet.y + bullet.h > enemy.y) {
+                        
+                        bullet.active = false;
+                        enemy.hp--;
+
+                        if (enemy.hp <= 0) {
+                            enemy.active = false;
+                            sound.playExplosion();
+                            createExplosion(enemy.x + enemy.w / 2, enemy.y + enemy.h / 2, enemy.type === 2 ? '#f87171' : '#e879f9');
+                            
+                            const pts = enemy.type === 2 ? 250 : 100;
+                            score += pts;
+                            popups.push(new ScorePopup(enemy.x, enemy.y, `+${pts}`));
+
+                            // Power-up Drop Chance (10%)
+                            if (Math.random() < 0.12) {
+                                powerups.push(new PowerUp(enemy.x, enemy.y, Math.random() > 0.5 ? 'triple' : 'shield'));
+                            }
+                        } else {
+                            // Hit spark
+                            createExplosion(bullet.x, bullet.y, '#facc15', 4);
+                        }
+                        updateHUD();
+                    }
+                });
+
+                // Player <-> Enemy Collision
+                if (enemy.active &&
+                    player.x < enemy.x + enemy.w &&
+                    player.x + player.w > enemy.x &&
+                    player.y < enemy.y + enemy.h &&
+                    player.y + player.h > enemy.y) {
+
+                    enemy.active = false;
+                    createExplosion(enemy.x, enemy.y, '#f87171', 15);
+
+                    if (player.shield) {
+                        player.shield = false;
+                        sound.playExplosion();
+                        popups.push(new ScorePopup(player.x, player.y, 'SHIELD BROKEN!', '#38bdf8'));
+                    } else {
+                        lives--;
+                        screenShake = 15;
+                        sound.playExplosion();
+                        createExplosion(player.x + player.w / 2, player.y + player.h / 2, '#06b6d4', 25);
+                        updateHUD();
+
+                        if (lives <= 0) {
+                            triggerGameOver();
+                        }
+                    }
+                }
+            });
+
+            enemies = enemies.filter(e => e.active);
+
+            // Player <-> Powerup Collision
+            powerups.forEach(p => {
+                if (p.active &&
+                    player.x < p.x + p.w &&
+                    player.x + player.w > p.x &&
+                    player.y < p.y + p.h &&
+                    player.y + player.h > p.y) {
+
+                    p.active = false;
+                    sound.playPowerup();
+
+                    if (p.type === 'triple') {
+                        player.powerType = 'triple';
+                        player.powerTimer = 400; // ~6.5 seconds
+                        popups.push(new ScorePopup(player.x, player.y, 'TRIPLE SHOT!', '#a855f7'));
+                    } else if (p.type === 'shield') {
+                        player.shield = true;
+                        popups.push(new ScorePopup(player.x, player.y, 'SHIELD UP!', '#38bdf8'));
+                    }
+                }
+            });
+
+            // Particles & Popups
+            particles.forEach(p => p.update());
+            particles = particles.filter(p => p.life > 0);
+
+            popups.forEach(p => p.update());
+            popups = popups.filter(p => p.life > 0);
+        }
+
+        function draw() {
+            ctx.save();
+
+            // Handle Screen Shake FX
+            if (screenShake > 0) {
+                const rx = (Math.random() - 0.5) * screenShake * 0.8;
+                const ry = (Math.random() - 0.5) * screenShake * 0.8;
+                ctx.translate(rx, ry);
+            }
+
+            // Clear Background
+            ctx.fillStyle = '#030014';
+            ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+            // Render Stars
+            stars.forEach(star => {
+                ctx.fillStyle = star.color;
+                ctx.fillRect(star.x, star.y, star.size, star.size);
+            });
+
+            if (isPlaying) {
+                // Render Game World
+                powerups.forEach(p => p.draw());
+                bullets.forEach(b => b.draw());
+                enemies.forEach(e => e.draw());
+                player.draw();
+                particles.forEach(p => p.draw());
+                popups.forEach(p => p.draw());
+            }
+
+            ctx.restore();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.onload = () => {
+            gameLoop();
+        };
+    </script>
+</body>
+</html>
