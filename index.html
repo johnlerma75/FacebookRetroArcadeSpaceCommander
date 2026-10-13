@@ -197,3 +197,104 @@ START GAME
                 osc.frequency.linearRampToValueAtTime(800, this.ctx.currentTime + 0.25);
                 gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.25);
+            }
+
+            playGameOver() {
+                if (this.muted || !this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(250, this.ctx.currentTime);
+                osc.frequency.linearRampToValueAtTime(60, this.ctx.currentTime + 0.6);
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.6);
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.6);
+            }
+        }
+
+        const sound = new SoundFX();
+
+        // --- Game Setup ---
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Internal render dimensions
+        const GAME_WIDTH = 360;
+        const GAME_HEIGHT = 480;
+        canvas.width = GAME_WIDTH;
+        canvas.height = GAME_HEIGHT;
+
+        // UI Elements
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const livesDisplay = document.getElementById('livesDisplay');
+        const startOverlay = document.getElementById('startOverlay');
+        const gameOverOverlay = document.getElementById('gameOverOverlay');
+        const startHighScore = document.getElementById('startHighScore');
+        const finalScore = document.getElementById('finalScore');
+        const finalHighScore = document.getElementById('finalHighScore');
+        const newRecordTag = document.getElementById('newRecordTag');
+        const soundToggleBtn = document.getElementById('soundToggleBtn');
+
+        // State Variables
+        let isPlaying = false;
+        let score = 0;
+        let lives = 3;
+        let highScore = parseInt(localStorage.getItem('cosmic_crusader_highscore') || '0');
+        let frameCount = 0;
+        let screenShake = 0;
+
+        startHighScore.textContent = highScore;
+
+        // Controls
+        const keys = { left: false, right: false, fire: false };
+
+        // Game Objects
+        let player;
+        let bullets = [];
+        let enemies = [];
+        let particles = [];
+        let powerups = [];
+        let popups = [];
+        let stars = [];
+
+        // Generate dynamic background starfield
+        for (let i = 0; i < 60; i++) {
+            stars.push({
+                x: Math.random() * GAME_WIDTH,
+                y: Math.random() * GAME_HEIGHT,
+                size: Math.random() > 0.8 ? 2 : 1,
+                speed: 0.5 + Math.random() * 1.5,
+                color: Math.random() > 0.5 ? '#ffffff' : '#38bdf8'
+            });
+        }
+
+        // Player Class
+        class Player {
+            constructor() {
+                this.w = 24;
+                this.h = 24;
+                this.x = GAME_WIDTH / 2 - this.w / 2;
+                this.y = GAME_HEIGHT - 50;
+                this.speed = 4;
+                this.fireCooldown = 0;
+                this.powerType = null; // 'triple'
+                this.powerTimer = 0;
+                this.shield = false;
+            }
+
+            update() {
+                if (keys.left && this.x > 0) this.x -= this.speed;
+                if (keys.right && this.x < GAME_WIDTH - this.w) this.x += this.speed;
+
+                if (this.fireCooldown > 0) this.fireCooldown--;
+                if (this.powerTimer > 0) {
+                    this.powerTimer--;
+                    if (this.powerTimer <= 0) this.powerType = null;
+                }
