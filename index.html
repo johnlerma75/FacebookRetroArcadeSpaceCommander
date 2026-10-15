@@ -7,3 +7,31 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
+        * {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        body {
+            font-family: 'Press Start 2P', monospace;
+            background-color: #030014;
+            color: #fff;
+            overflow: hidden;
+        }
+        .pixel-border {
+            box-shadow: 
+                0 -4px 0 0 #3b82f6,
+                0 4px 0 0 #3b82f6,
+                -4px 0 0 0 #3b82f6,
+                4px 0 0 0 #3b82f6;
+        }
+        .pixel-border-gold {
+            box-shadow: 
+                0 -4px 0 0 #eab308,
+                0 4px 0 0 #eab308,
+                -4px 0 0 0 #eab308,
+                4px 0 0 0 #eab308;
+        }        .arcade-btn {
+            transition: all 0.1s ease;
+            text-shadow: 2px 2px #000;
+        }
