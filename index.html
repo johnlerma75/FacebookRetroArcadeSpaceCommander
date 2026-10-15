@@ -510,5 +510,87 @@ draw() {
             if (e.code === 'ArrowRight' || e.code === 'KeyD') keys.right = false;
             if (e.code === 'Space') keys.fire = false;
         });
+// Touch Control Wiring
+        const bindTouch = (id, keyName) => {
+            const btn = document.getElementById(id);
+            btn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                sound.init();
+                keys[keyName] = true;
+            });
+            btn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                keys[keyName] = false;
+            });
+            btn.addEventListener('mousedown', () => { keys[keyName] = true; });
+            btn.addEventListener('mouseup', () => { keys[keyName] = false; });
+        };
+
+        bindTouch('btnLeft', 'left');
+        bindTouch('btnRight', 'right');
+        bindTouch('btnFire', 'fire');
+
+        // Mute / Unmute Button
+        soundToggleBtn.addEventListener('click', () => {
+            sound.init();
+            sound.muted = !sound.muted;
+            soundToggleBtn.textContent = sound.muted ? '🔇 MUTED' : '🔊 SOUND';
+        });
+
+        // --- Core Game Functions ---
+        function startGame() {
+            sound.init();
+            player = new Player();
+            bullets = [];
+            enemies = [];
+            particles = [];
+            powerups = [];
+            popups = [];
+            score = 0;
+            lives = 3;
+            frameCount = 0;
+            isPlaying = true;
+
+            updateHUD();
+            startOverlay.classList.add('hidden');
+            gameOverOverlay.classList.add('hidden');
+        }
+
+        function triggerGameOver() {
+            isPlaying = false;
+            sound.playGameOver();
+
+            let isNewRecord = false;
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('cosmic_crusader_highscore', highScore.toString());
+                isNewRecord = true;
+            }
+
+            finalScore.textContent = score;
+            finalHighScore.textContent = highScore;
+            if (isNewRecord) {
+                newRecordTag.classList.remove('hidden');
+            } else {
+                newRecordTag.classList.add('hidden');
+            }
+
+            gameOverOverlay.classList.remove('hidden');
+        }
+
+        function updateHUD() {
+            scoreDisplay.textContent = score.toString().padStart(6, '0');
+            livesDisplay.textContent = `x${lives}`;
+        }
+
+        // --- Facebook Share Action ---
+        document.getElementById('fbShareBtn').addEventListener('click', () => {
+            const gameUrl = encodeURIComponent(window.location.href);
+            const shareText = encodeURIComponent(`I scored ${score} points in Cosmic Crusader! Can you beat my high score? 🚀👾`);
+            const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${gameUrl}&quote=${shareText}`;
+            window.open(fbUrl, '_blank', 'width=600,height=400');
+        });
+
+        document.getElementById('startBtn').addEventListener('click', startGame);
 
 
