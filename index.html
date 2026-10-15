@@ -675,6 +675,66 @@ draw() {
 
                     enemy.active = false;
                     createExplosion(enemy.x, enemy.y, '#f87171', 15);
+                    if (player.shield) {
+                        player.shield = false;
+                        sound.playExplosion();
+                        popups.push(new ScorePopup(player.x, player.y, 'SHIELD BROKEN!', '#38bdf8'));
+                    } else {
+                        lives--;
+                        screenShake = 15;
+                        sound.playExplosion();
+                        createExplosion(player.x + player.w / 2, player.y + player.h / 2, '#06b6d4', 25);
+                        updateHUD();
+
+                        if (lives <= 0) {
+                            triggerGameOver();
+                        }
+                    }
+                }
+            });
+
+            enemies = enemies.filter(e => e.active);
+
+            // Player <-> Powerup Collision
+            powerups.forEach(p => {
+                if (p.active &&
+                    player.x < p.x + p.w &&
+                    player.x + player.w > p.x &&
+                    player.y < p.y + p.h &&
+                    player.y + player.h > p.y) {
+
+                    p.active = false;
+                    sound.playPowerup();
+
+                    if (p.type === 'triple') {
+                        player.powerType = 'triple';
+                        player.powerTimer = 400; // ~6.5 seconds
+                        popups.push(new ScorePopup(player.x, player.y, 'TRIPLE SHOT!', '#a855f7'));
+                    } else if (p.type === 'shield') {
+                        player.shield = true;
+                        popups.push(new ScorePopup(player.x, player.y, 'SHIELD UP!', '#38bdf8'));
+                    }
+                }
+            });
+
+            // Particles & Popups
+            particles.forEach(p => p.update());
+            particles = particles.filter(p => p.life > 0);
+
+            popups.forEach(p => p.update());
+            popups = popups.filter(p => p.life > 0);
+        }
+
+        function draw() {
+            ctx.save();
+
+            // Handle Screen Shake FX
+            if (screenShake > 0) {
+                const rx = (Math.random() - 0.5) * screenShake * 0.8;
+                const ry = (Math.random() - 0.5) * screenShake * 0.8;
+                ctx.translate(rx, ry);
+            }
+
 
 
 
