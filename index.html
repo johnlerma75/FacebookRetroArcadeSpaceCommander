@@ -93,3 +93,17 @@
             <!-- GAME OVER OVERLAY -->
             <div id="gameOverOverlay" class="hidden absolute inset-0 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center z-20">
                 <h2 class="text-2xl sm:text-3xl text-red-500 mb-2 font-bold animate-bounce">GAME OVER</h2>
+<div class="my-4 text-xs sm:text-sm space-y-2">
+                    <p class="text-slate-300">FINAL SCORE: <span id="finalScore" class="text-cyan-400">0</span></p>
+                    <p class="text-slate-300">HIGH SCORE: <span id="finalHighScore" class="text-yellow-400">0</span></p>
+                    <p id="newRecordTag" class="hidden text-yellow-300 text-[10px] animate-pulse">★ NEW RECORD! ★</p>
+                </div>
+
+                <div class="flex flex-col gap-3 w-full max-w-xs mt-4">
+                    <button id="restartBtn" class="arcade-btn bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-5 py-3 rounded text-xs pixel-border cursor-pointer">
+                        PLAY AGAIN
+                    </button>
+                    
+                    <button id="fbShareBtn" class="arcade-btn bg-blue-600 hover:bg-blue-500 text-white font-bold px-5 py-3 rounded text-xs flex items-center justify-center gap-2 cursor-pointer border border-blue-400">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                        SHARE ON FACEBOOK
