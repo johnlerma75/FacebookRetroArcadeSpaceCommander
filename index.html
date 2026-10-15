@@ -329,3 +329,102 @@ update() {
                 ctx.fillRect(-2, -10, 4, 16);
                 ctx.fillRect(-8, -2, 16, 8);
                 ctx.fillRect(-12, 4, 24, 4);
+                // Engine Flame Animation
+                ctx.fillStyle = Math.random() > 0.5 ? '#f97316' : '#eab308';
+                ctx.fillRect(-4, 8, 8, 4 + Math.random() * 4);
+
+                ctx.restore();
+            }
+        }
+
+        // Bullet Class
+        class Bullet {
+            constructor(x, y, vx, vy) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.w = 4;
+                this.h = 8;
+                this.active = true;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                if (this.y < -10 || this.x < -10 || this.x > GAME_WIDTH + 10) this.active = false;
+            }
+
+            draw() {
+                ctx.fillStyle = '#facc15';
+                ctx.fillRect(this.x, this.y, this.w, this.h);
+            }
+        }
+
+        // Enemy Class
+        class Enemy {
+            constructor(type = 1) {
+                this.type = type;
+                this.w = type === 2 ? 28 : 20;
+                this.h = type === 2 ? 24 : 20;
+                this.x = Math.random() * (GAME_WIDTH - this.w);
+                this.y = -30;
+                this.hp = type === 2 ? 3 : 1;
+                this.speed = type === 2 ? 1.2 : 2.0 + Math.random() * 0.8;
+                this.sinOffset = Math.random() * Math.PI * 2;
+                this.active = true;
+            }
+
+            update() {
+                this.y += this.speed;
+                if (this.type === 1) {
+                    this.x += Math.sin(this.y * 0.05 + this.sinOffset) * 1.2;
+                }
+
+                if (this.y > GAME_HEIGHT + 20) {
+                    this.active = false;
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
+
+                if (this.type === 1) {
+                    // Small Invader (Magenta)
+                    ctx.fillStyle = '#e879f9';
+                    ctx.fillRect(-8, -8, 16, 16);
+                    ctx.fillStyle = '#000';
+                    ctx.fillRect(-5, -3, 3, 3);
+                    ctx.fillRect(2, -3, 3, 3);
+                } else {
+                    // Heavy Invader (Red/Orange)
+                    ctx.fillStyle = '#f87171';
+                    ctx.fillRect(-12, -10, 24, 16);
+                    ctx.fillStyle = '#f97316';
+                    ctx.fillRect(-8, 2, 16, 6);
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(-6, -4, 4, 4);
+                    ctx.fillRect(2, -4, 4, 4);
+                }
+
+                ctx.restore();
+            }
+        }
+
+        // PowerUp Class
+        class PowerUp {
+            constructor(x, y, type) {
+                this.x = x;
+                this.y = y;
+                this.type = type; // 'triple' or 'shield'
+                this.w = 14;
+                this.h = 14;
+                this.active = true;
+            }
+
+            update() {
+                this.y += 1.5;
+                if (this.y > GAME_HEIGHT + 20) this.active = false;
+            }
+
