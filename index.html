@@ -284,3 +284,48 @@ playExplosion() {
                 this.powerTimer = 0;
                 this.shield = false;
             }
+update() {
+                if (keys.left && this.x > 0) this.x -= this.speed;
+                if (keys.right && this.x < GAME_WIDTH - this.w) this.x += this.speed;
+
+                if (this.fireCooldown > 0) this.fireCooldown--;
+                if (this.powerTimer > 0) {
+                    this.powerTimer--;
+                    if (this.powerTimer <= 0) this.powerType = null;
+                }
+
+                if (keys.fire && this.fireCooldown === 0) {
+                    this.shoot();
+                    this.fireCooldown = 10;
+                }
+            }
+
+            shoot() {
+                sound.playShoot();
+                if (this.powerType === 'triple') {
+                    bullets.push(new Bullet(this.x + this.w / 2 - 2, this.y, 0, -6));
+                    bullets.push(new Bullet(this.x + this.w / 2 - 2, this.y, -1.8, -5.5));
+                    bullets.push(new Bullet(this.x + this.w / 2 - 2, this.y, 1.8, -5.5));
+                } else {
+                    bullets.push(new Bullet(this.x + this.w / 2 - 2, this.y, 0, -6));
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
+
+                // Shield Aura
+                if (this.shield) {
+                    ctx.strokeStyle = '#38bdf8';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 18, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                // Retro Spaceship Pixel Art Drawing
+                ctx.fillStyle = '#06b6d4'; // Cyan primary
+                ctx.fillRect(-2, -10, 4, 16);
+                ctx.fillRect(-8, -2, 16, 8);
+                ctx.fillRect(-12, 4, 24, 4);
