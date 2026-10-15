@@ -734,6 +734,41 @@ draw() {
                 const ry = (Math.random() - 0.5) * screenShake * 0.8;
                 ctx.translate(rx, ry);
             }
+// Clear Background
+            ctx.fillStyle = '#030014';
+            ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+            // Render Stars
+            stars.forEach(star => {
+                ctx.fillStyle = star.color;
+                ctx.fillRect(star.x, star.y, star.size, star.size);
+            });
+
+            if (isPlaying) {
+                // Render Game World
+                powerups.forEach(p => p.draw());
+                bullets.forEach(b => b.draw());
+                enemies.forEach(e => e.draw());
+                player.draw();
+                particles.forEach(p => p.draw());
+                popups.forEach(p => p.draw());
+            }
+
+            ctx.restore();
+        }
+
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        window.onload = () => {
+            gameLoop();
+        };
+    </script>
+</body>
+</html>
 
 
 
