@@ -293,8 +293,8 @@ update() {
                 if (this.powerTimer > 0) {
                     this.powerTimer--;
                     if (this.powerTimer <= 0) this.powerType = null;
-                if (this.invulnTimer > 0) this.invulnTimer--;
                 }
+                if (this.invulnTimer > 0) this.invulnTimer--;
 
                 if (keys.fire && this.fireCooldown === 0) {
                     this.shoot();
@@ -695,9 +695,8 @@ draw() {
                             triggerGameOver();
                         }
                     }
-        }  // closes the else (already in your file)
-        player.invulnTimer = 120; // ~2 seconds at 60fps
-    }  // closes the collision block (already in your file)
+                    player.invulnTimer = 120; // ~2 seconds at 60fps
+                }
 });
 
             enemies = enemies.filter(e => e.active);
@@ -776,7 +775,3 @@ draw() {
     </script>
 </body>
 </html>
-
-
-
-
