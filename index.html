@@ -283,6 +283,7 @@ playExplosion() {
                 this.powerType = null; // 'triple'
                 this.powerTimer = 0;
                 this.shield = false;
+                this.invulnTimer = 0; // frames of post-hit invulnerability (i-frames)
             }
 update() {
                 if (keys.left && this.x > 0) this.x -= this.speed;
@@ -292,6 +293,7 @@ update() {
                 if (this.powerTimer > 0) {
                     this.powerTimer--;
                     if (this.powerTimer <= 0) this.powerType = null;
+                if (this.invulnTimer > 0) this.invulnTimer--;
                 }
 
                 if (keys.fire && this.fireCooldown === 0) {
@@ -312,6 +314,9 @@ update() {
             }
 
             draw() {
+                // Blink while invulnerable
+if (this.invulnTimer > 0 && Math.floor(this.invulnTimer / 4) % 2 === 0) return;
+
                 ctx.save();
                 ctx.translate(this.x + this.w / 2, this.y + this.h / 2);
 
