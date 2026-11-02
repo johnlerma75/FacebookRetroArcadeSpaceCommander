@@ -672,7 +672,7 @@ draw() {
                 });
 
                 // Player <-> Enemy Collision
-                if (enemy.active &&
+                if (player.invulnTimer === 0 && enemy.active &&
                     player.x < enemy.x + enemy.w &&
                     player.x + player.w > enemy.x &&
                     player.y < enemy.y + enemy.h &&
