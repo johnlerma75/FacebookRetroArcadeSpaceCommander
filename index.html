@@ -695,6 +695,10 @@ draw() {
                             triggerGameOver();
                         }
                     }
+                      }                               // line 97, closes the else
+  player.invulnTimer = 120;       // ~2 seconds at 60fps
+}                                 // line 98, closes the collision block
+
                 }
             });
 
